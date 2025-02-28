@@ -9,7 +9,6 @@ phases:
   build:
     commands:
       - echo "Building the Docker image"
-      - codebuild-breakpoint  # Pauses the build here
       - docker build -t network .
       - docker tag network:latest 888577039597.dkr.ecr.eu-west-1.amazonaws.com/network:latest
 
@@ -17,7 +16,12 @@ phases:
     commands:
       - echo "Pushing Docker image to ECR"
       - docker push 888577039597.dkr.ecr.eu-west-1.amazonaws.com/network:latest
+      - echo "Saving build artifacts"
+      - mkdir -p NetworkPipeline/BuildArtif
+      - echo "Build successful" > NetworkPipeline/BuildArtif/build_info.txt
 
 artifacts:
-  files: []
+  files:
+    - "NetworkPipeline/BuildArtif/**"
+  discard-paths: no
 
