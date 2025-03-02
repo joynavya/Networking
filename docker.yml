@@ -48,17 +48,27 @@
 
     - name: Copy webapp.html to EC2 instance
       copy:
-        src: /mnt/d/DBS/Assignment/Network/index.html # Make sure this is the correct path to the file
+        src: /mnt/d/DBS/Assignment/Network/index.html
         dest: /home/ubuntu/webapp/index.html
 
-    - name: Check if index.html exists
+    - name: Check if index.html exists on EC2 instance
       stat:
-        path: /mnt/d/DBS/Assignment/Network/index.html
+        path: /home/ubuntu/webapp/index.html
       register: file_stat
 
     - name: Display file status
       debug:
         msg: "File exists: {{ file_stat.stat.exists }}"
+
+    - name: Create Dockerfile to serve index.html
+      copy:
+        dest: /home/ubuntu/webapp/Dockerfile
+        content: |
+          FROM python:3.8-slim
+          WORKDIR /usr/src/app
+          COPY index.html .
+          EXPOSE 5000
+          CMD ["python", "-m", "http.server", "5000", "--bind", "0.0.0.0"]
 
     - name: Build Docker Image manually
       command: docker build -t webapp /home/ubuntu/webapp
@@ -71,7 +81,7 @@
         state: started
         restart_policy: always
         published_ports:
-          - "8080:80"  # Assuming your web app is running on port 80 in the container
+          - "5000:5000"  # Mapping port 5000 to 5000 inside the container
 
     - name: Check Docker container status
       command: docker ps
@@ -81,35 +91,4 @@
     - name: Display Docker container status
       debug:
         msg: "{{ docker_ps.stdout }}"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
