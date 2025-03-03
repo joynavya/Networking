@@ -3,6 +3,7 @@
   hosts: ec2_instances
   become: yes
   gather_facts: yes
+
   tasks:
     - name: Update package list
       apt:
@@ -11,28 +12,8 @@
     - name: Install required packages
       apt:
         name:
+          - docker.io
           - python3-pip
-          - python3-dev
-          - python3-venv
-        state: present
-
-    - name: Ensure virtual environment directory exists
-      file:
-        path: /home/ubuntu/myenv
-        state: directory
-
-    - name: Create virtual environment for Python
-      command: python3 -m venv /home/ubuntu/myenv
-      when: not ansible_facts['os_family'] == 'RedHat'
-
-    - name: Install Docker Python module in virtual environment
-      pip:
-        executable: /home/ubuntu/myenv/bin/pip
-        name: docker
-
-    - name: Install Docker
-      apt:
-        name: docker.io
         state: present
 
     - name: Enable and start Docker service
@@ -46,33 +27,23 @@
         path: /home/ubuntu/webapp
         state: directory
 
-    - name: Copy webapp.html to EC2 instance
+    - name: Copy web application file to EC2 instance
       copy:
         src: /mnt/d/DBS/Assignment/Network/index.html
         dest: /home/ubuntu/webapp/index.html
 
-    - name: Check if index.html exists on EC2 instance
-      stat:
-        path: /home/ubuntu/webapp/index.html
-      register: file_stat
-
-    - name: Display file status
-      debug:
-        msg: "File exists: {{ file_stat.stat.exists }}"
-
-    - name: Create Dockerfile to serve index.html
+    - name: Create Dockerfile
       copy:
         dest: /home/ubuntu/webapp/Dockerfile
         content: |
-          FROM python:3.8-slim
-          WORKDIR /usr/src/app
-          COPY index.html .
-          EXPOSE 5000
-          CMD ["python", "-m", "http.server", "5000", "--bind", "0.0.0.0"]
+          FROM nginx:latest
+          COPY index.html /usr/share/nginx/html/index.html
+          EXPOSE 80
+          CMD ["nginx", "-g", "daemon off;"]
 
-    - name: Build Docker Image manually
+    - name: Build Docker Image
       command: docker build -t webapp /home/ubuntu/webapp
-      become: true  
+      become: true
 
     - name: Run Docker Container
       docker_container:
@@ -81,7 +52,7 @@
         state: started
         restart_policy: always
         published_ports:
-          - "5000:5000"  # Mapping port 5000 to 5000 inside the container
+          - "80:80"
 
     - name: Check Docker container status
       command: docker ps
