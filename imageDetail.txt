@@ -1,0 +1,4 @@
+image_name: webapp
+image_version: latest
+container_name: webapp_container
+port: 80
