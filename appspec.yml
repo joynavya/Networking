@@ -5,6 +5,7 @@ files:
     destination: /home/ubuntu/webapp
 hooks:
   AfterInstall:
-    - location: scripts/start_docker.sh
+    - location: start_docker.sh
       timeout: 300
       runas: ubuntu
+
