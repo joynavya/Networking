@@ -1,11 +1,10 @@
 version: 0.0
 os: linux
 files:
-  - source: imageDetail.txt
-    destination: /home/ubuntu/
-
+  - source: /
+    destination: /home/ubuntu/webapp
 hooks:
   AfterInstall:
-    - location: deploy.sh
+    - location: scripts/start_docker.sh
       timeout: 300
       runas: ubuntu
