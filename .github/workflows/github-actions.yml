@@ -20,7 +20,8 @@ jobs:
 
       - name: Stop and Remove Existing Docker Container (if using port 80)
         run: |
-          ssh -i ~/.ssh/my-key.pem -t ec2-user@3.254.135.160 << 'EOF'
+          ssh -v -i ~/.ssh/my-key.pem -t ec2-user@3.254.135.160 << 'EOF'
+            # Check if any container is using port 80 and stop/remove it
             CONTAINER_ID=$(docker ps -q -f "publish=80")
             if [ -n "$CONTAINER_ID" ]; then
               docker stop $CONTAINER_ID
@@ -30,17 +31,17 @@ jobs:
 
       - name: Load Docker Image on EC2
         run: |
-          scp -i ~/.ssh/my-key.pem my-nginx.tar ec2-user@3.254.135.160:/home/ec2-user/
+          scp -v -i ~/.ssh/my-key.pem my-nginx.tar ec2-user@3.254.135.160:/home/ec2-user/
 
       - name: Load Docker Image on EC2
         run: |
-          ssh -i ~/.ssh/my-key.pem -t ec2-user@3.254.135.160 << 'EOF'
+          ssh -v -i ~/.ssh/my-key.pem -t ec2-user@3.254.135.160 << 'EOF'
             docker load -i /home/ec2-user/my-nginx.tar
           EOF
 
       - name: Run Docker Container
         run: |
-          ssh -i ~/.ssh/my-key.pem -t ec2-user@3.254.135.160 << 'EOF'
+          ssh -v -i ~/.ssh/my-key.pem -t ec2-user@3.254.135.160 << 'EOF'
             sudo docker run -d -p 80:80 --name my-web-app my-web-app
           EOF
 
