@@ -29,7 +29,7 @@
 
     - name: Copy web application file to EC2 instance
       copy:
-        src: /mnt/d/DBS/Assignment/Network/index.html
+        src: ./index.html  # Ensure this is relative to the repo where the playbook is running
         dest: /home/ubuntu/webapp/index.html
 
     - name: Create Dockerfile
@@ -62,4 +62,3 @@
     - name: Display Docker container status
       debug:
         msg: "{{ docker_ps.stdout }}"
-
